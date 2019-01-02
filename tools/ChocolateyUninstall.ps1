@@ -2,7 +2,7 @@
 #          This is only necessary since the free version of chocolatey doesn't
 #          support custom install paths.
 
-# Include variables file
+# Dot source the variables file
 . "$PSScriptRoot\vars.ps1"
 
 # Delete destination folder if it exists

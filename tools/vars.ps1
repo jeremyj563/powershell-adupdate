@@ -1,6 +1,8 @@
 $AppName = "ADUpdate"
 $RepoName = "it-powershell-adupdate"
-$SourceDir = "C:\ProgramData\chocolatey\lib\{0}" -f $RepoName
-$DestinationDir = "C:\Test\{0}" -f $AppName
-#$DestinationDir = "C:\Windows\SYSVOL\domain\scripts\{0}" -f $AppName
-[String[]] $ExecutablesToIgnore = @{}#"$SourceDir\$AppName.exe" #, $SourceDir\<NextExecutableInArray>.exe
+$SourceDir = "C:\ProgramData\chocolatey\lib\$RepoName"
+$DestinationDir = "C:\Test\$AppName"
+#$DestinationDir = "C:\Windows\SYSVOL\domain\scripts\$AppName"
+
+$LibDir = "$DestinationDir\lib"
+$Log4netDll = Get-ChildItem -Path $LibDir -Filter "log4net.dll" -Recurse -ErrorAction SilentlyContinue -Force
