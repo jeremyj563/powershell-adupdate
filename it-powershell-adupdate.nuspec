@@ -8,7 +8,7 @@
     </metadata>
     <files>
         <file src=".\ADUpdate.ps1" target=".\" />
-	<file src=".\**\lib\net45-full\log4net.dll" target=".\lib\log4net-1.dll" />
+	<file src=".\lib\net45-full\log4net.dll" target=".\lib\log4net.dll" />
         <file src=".\tools\*" target=".\tools\" />
     </files>
 </package>
