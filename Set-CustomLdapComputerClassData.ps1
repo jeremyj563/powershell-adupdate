@@ -233,6 +233,7 @@ Function Set-UpdatedComputerObject {
 #endregion
 
 #region Main
+
 Initialize-Log4Net -libraryPath "$PSScriptRoot\log4net.dll"
 
 # Only run the update if running as "NT AUTHORITY\SYSTEM"
