@@ -32,9 +32,10 @@ Function Initialize-Log4Net {
     param (
         [string]$libraryPath
     )
+    # Load the log4net assembly from log4net.dll
     try {
-        # Load the log4net assembly from log4net.dll
-        Add-Type -Path $libraryPath
+        # UnsafeLoadFrom() allows loading the assembly from a UNC path
+        [System.Reflection.Assembly]::UnsafeLoadFrom($libraryPath) 
         [log4net.LogManager]::ResetConfiguration()   
     }
     catch {
