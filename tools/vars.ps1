@@ -1,5 +1,4 @@
-$AppName = "ADUpdate"
+$AppName = "PS-ADUpdate"
 $RepoName = "it-powershell-adupdate"
 $SourceDir = "C:\ProgramData\chocolatey\lib\$RepoName"
-$DestinationDir = "C:\Test\$AppName"
-#$DestinationDir = "C:\Windows\SYSVOL\domain\scripts\$AppName"
+$DestinationDir = "C:\Windows\SYSVOL\domain\scripts\$AppName"
