@@ -2,7 +2,7 @@
 $AppName = "PS-ADUpdate"
 $RepoName = "it-powershell-adupdate"
 $SourceDir = "C:\ProgramData\chocolatey\lib\$RepoName"
-$DestinationDir = "C:\Windows\SYSVOL\domain\scripts\$AppName"
+$DestinationDir = "\\citrix-dch.local\NETLOGON\$AppName"
 
 # Close any files that are open on the SMB share
 Write-Host ("`nClosing any open SMB files for application: {0}`n" -f $AppName) -ForegroundColor Green
