@@ -1,14 +1,8 @@
 # Purpose: Copy install folder to production Applications folder since the
 #          free version of chocolatey doesn't support custom install paths.
 
-# Dot source the variables file
-. "$PSScriptRoot\vars.ps1"
-
-# Delete destination folder if it already exists (eg. 'choco upgrade')
-if (Test-Path -Path $DestinationDir) {
-    Write-Host ("`nRemoving directory: {0}`n" -f $DestinationDir) -ForegroundColor Green
-    [System.IO.Directory]::Delete($DestinationDir, $true)
-}
+# Dot source the init file
+. "$PSScriptRoot\init.ps1"
 
 # Copy source folder to destination folder
 Write-Host ("`nCopying folder: {0} -> {1}`n" -f $SourceDir, $DestinationDir) -ForegroundColor Green
