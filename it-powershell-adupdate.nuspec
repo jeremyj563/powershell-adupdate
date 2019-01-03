@@ -7,7 +7,7 @@
         <description>it-powershell-adupdate</description>
     </metadata>
     <files>
-        <file src=".\ADUpdate.ps1" target=".\" />
+        <file src=".\Set-CustomLdapComputerClassData.ps1" target=".\" />
 	<file src=".\**\net45-full\log4net.dll" target=".\lib\" />
         <file src=".\tools\*" target=".\tools\" />
     </files>
