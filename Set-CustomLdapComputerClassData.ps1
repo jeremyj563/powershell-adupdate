@@ -38,7 +38,7 @@ Function Initialize-Log4Net {
         [log4net.LogManager]::ResetConfiguration()   
     }
     catch {
-        Exit-Script -exitCode 99, -message ("EXCEPTION in {0}: {1}" -f $MyInvocation.MyCommand, $PSItem.Exception.Message) -errorWritingToLog $true
+        Exit-Script -exitCode 99 -message ("EXCEPTION in {0}: {1}" -f $MyInvocation.MyCommand, $PSItem.Exception.Message) -errorWritingToLog $true
     }
 }
 
@@ -108,7 +108,7 @@ Function Write-Log {
             }
         }
         catch {
-            Exit-Script -exitCode 99, -message ("EXCEPTION in {0}: {1}" -f $MyInvocation.MyCommand, $PSItem.Exception.Message) -errorWritingToLog $true
+            Exit-Script -exitCode 99 -message ("EXCEPTION in {0}: {1}" -f $MyInvocation.MyCommand, $PSItem.Exception.Message) -errorWritingToLog $true
         }
     }
 
