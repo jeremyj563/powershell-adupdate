@@ -33,8 +33,8 @@ Function Initialize-Log4Net {
         [string]$libraryPath
     )
     try {
-        # Load the log4net.dll file
-        [void][Reflection.Assembly]::LoadFile($libraryPath)
+        # Load the log4net assembly from log4net.dll
+        Add-Type -Path $libraryPath
         [log4net.LogManager]::ResetConfiguration()   
     }
     catch {
@@ -234,7 +234,7 @@ Function Set-UpdatedComputerObject {
 
 #region Main
 
-Initialize-Log4Net -libraryPath "$PSScriptRoot\log4net.dll"
+Initialize-Log4Net -libraryPath (Join-Path -Path $PSScriptRoot -ChildPath "log4net.dll")
 
 # Only run the update if running as "NT AUTHORITY\SYSTEM"
 if ([System.Security.Principal.WindowsIdentity]::GetCurrent().IsSystem) {
@@ -249,7 +249,7 @@ if ([System.Security.Principal.WindowsIdentity]::GetCurrent().IsSystem) {
         Exit-Script -exitCode 2 -message "Failed to build updated computer attribute"
     }
 } else {
-    Exit-Script -exitCode 1 -message "Not running as ""NT AUTHORITY\SYSTEM""" -logEvent [LogEvent]::Fatal
+    Exit-Script -exitCode 1 -message "Not running as ""NT AUTHORITY\SYSTEM""" -logEvent Fatal
 }
 
 #endregion
