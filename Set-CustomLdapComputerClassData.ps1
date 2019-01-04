@@ -124,11 +124,11 @@ Function Write-Log {
 
 Function New-UpdatedComputerObject {
     # Query the registry for the last logged on user
-    $userName = Get-LastLoggedOnUserName
+    [string]$userName = Get-LastLoggedOnUserName
     # Query AD (through WMI) for the user's display name
-    $displayName = Get-UserDisplayName -userName $userName
+    [string]$displayName = Get-UserDisplayName -userName $userName
     # Query WMI for a list of network addresses
-    $networkAddresses = Get-NetworkAddresses
+    [string[]]$networkAddresses = Get-NetworkAddresses
 
     if ($null -ne $userName -and $null -ne $displayName -and $null -ne $networkAddresses) {
         # Build the updated Active Directory computer attribute
@@ -183,7 +183,7 @@ Function Get-NetworkAddresses {
     try {
         $networkAdapterConfigurations = Get-WmiObject -Class "Win32_NetworkAdapterConfiguration" | Where-Object { $null -ne $PSItem.IPAddress }
         $networkAddresses = $networkAdapterConfigurations | ForEach-Object { $PSItem.IPAddress }
-        return $networkAddresses   
+        return $networkAddresses
     }
     catch {
         Write-Log -message ("EXCEPTION in {0}: {1}" -f $MyInvocation.MyCommand, $PSItem.Exception.Message)
@@ -238,7 +238,7 @@ Function Set-UpdatedComputerObject {
 Initialize-Log4Net -libraryPath (Join-Path -Path $PSScriptRoot -ChildPath "log4net.dll")
 
 # Only run the update if running as "NT AUTHORITY\SYSTEM"
-if ([System.Security.Principal.WindowsIdentity]::GetCurrent().IsSystem) {
+if (![System.Security.Principal.WindowsIdentity]::GetCurrent().IsSystem) {
     $updatedRecord = New-UpdatedComputerObject
     if ($null -ne $updatedRecord) {
         if (Set-UpdatedComputerObject -updatedRecord $updatedRecord) {
