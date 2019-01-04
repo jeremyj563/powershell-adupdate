@@ -35,8 +35,8 @@ Function Initialize-Log4Net {
     # Load the log4net assembly from log4net.dll
     try {
         # UnsafeLoadFrom() allows loading the assembly from a UNC path
-        [System.Reflection.Assembly]::UnsafeLoadFrom($libraryPath) 
-        [log4net.LogManager]::ResetConfiguration()   
+        [System.Reflection.Assembly]::UnsafeLoadFrom($libraryPath) | Out-Null
+        [log4net.LogManager]::ResetConfiguration()
     }
     catch {
         Exit-Script -exitCode 99 -message ("EXCEPTION in {0}: {1}" -f $MyInvocation.MyCommand, $PSItem.Exception.Message) -errorWritingToLog $true
