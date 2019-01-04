@@ -238,7 +238,7 @@ Function Set-UpdatedComputerObject {
 Initialize-Log4Net -libraryPath (Join-Path -Path $PSScriptRoot -ChildPath "log4net.dll")
 
 # Only run the update if running as "NT AUTHORITY\SYSTEM"
-if (![System.Security.Principal.WindowsIdentity]::GetCurrent().IsSystem) {
+if ([System.Security.Principal.WindowsIdentity]::GetCurrent().IsSystem) {
     $updatedRecord = New-UpdatedComputerObject
     if ($null -ne $updatedRecord) {
         if (Set-UpdatedComputerObject -updatedRecord $updatedRecord) {
