@@ -70,7 +70,7 @@ Function Exit-Script {
     param (
         [int]$exitCode,
         [string]$message,
-        [LogEvent]$logEvent,
+        [LogEvent]$logEvent = [LogEvent]::Error,
         [bool]$errorWritingToLog = $false
     )
 
