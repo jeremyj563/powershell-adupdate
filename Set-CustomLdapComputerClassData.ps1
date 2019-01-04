@@ -201,7 +201,7 @@ Function Set-UpdatedComputerObject {
         [PSCustomObject]$updatedRecord
     )
     try {
-         # Get an array of all the properties to be updated
+         # Get an array of the names of the properties to be updated
         [string[]]$properties = $updatedRecord.PSObject.Properties | ForEach-Object {$PSItem.Name}
 
         # Create the connection/update context using these properties
@@ -222,7 +222,7 @@ Function Set-UpdatedComputerObject {
         # Set the objects properties to the updated values
         $updatedRecord.PSObject.Properties | ForEach-Object {$managementObject.SetPropertyValue($PSItem.Name, $PSItem.Value)}
     
-        return $managementObject.Put($putOptions)   
+        return $managementObject.Put($putOptions)
     }
     catch {
         Write-Log -message ("EXCEPTION in {0}: {1}" -f $MyInvocation.MyCommand, $PSItem.Exception.Message)
