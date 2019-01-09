@@ -22,7 +22,8 @@ https://www.jmjohnson85.com
 
 #region Private Variables
 
-$_scriptName = ([IO.FileInfo]$MyInvocation.MyCommand.Definition).BaseName
+#$_scriptName = ([IO.FileInfo]$MyInvocation.MyCommand.Definition).BaseName
+$_scriptName = "ADUpdate"
 
 #endregion
 
