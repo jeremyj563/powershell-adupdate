@@ -22,14 +22,13 @@ https://www.jmjohnson85.com
 
 #region Private Variables
 
-#$_scriptName = ([IO.FileInfo]$MyInvocation.MyCommand.Definition).BaseName
 $_scriptName = "ADUpdate"
 
 #endregion
 
 #region Logging
 
-Function Initialize-Log4Net {
+function Initialize-Log4Net {
     param (
         [string]$libraryPath
     )
@@ -44,7 +43,7 @@ Function Initialize-Log4Net {
     }
 }
 
-Function Get-EventLogger {
+function Get-EventLogger {
     param (
         [string]$applicationName
     )
@@ -59,7 +58,7 @@ Function Get-EventLogger {
     return [log4net.LogManager]::GetLogger("EventLogAppender");
 }
 
-Enum LogEvent {
+enum LogEvent {
     Debug
     Error
     Fatal
@@ -67,7 +66,7 @@ Enum LogEvent {
     Warn
 }
 
-Function Exit-Script {
+function Exit-Script {
     param (
         [int]$exitCode,
         [string]$message,
@@ -87,7 +86,7 @@ Function Exit-Script {
     exit $exitCode
 }
 
-Function Write-Log {
+function Write-Log {
     param (
         [string]$message,
         [LogEvent]$logEvent = [LogEvent]::Error,
@@ -123,7 +122,7 @@ Function Write-Log {
 
 #region Create Updated Object
 
-Function New-UpdatedComputerObject {
+function New-UpdatedComputerObject {
     # Query the registry for the last logged on user
     [string]$userName = Get-LastLoggedOnUserName
     # Query AD (through WMI) for the user's display name
@@ -145,7 +144,7 @@ Function New-UpdatedComputerObject {
     return $null
 }
 
-Function Get-LastLoggedOnUserName {
+function Get-LastLoggedOnUserName {
     # This data comes from the registry
     try {
         $regEntry = Get-ItemProperty -Path HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Authentication\LogonUI -Name "LastLoggedOnSAMUser"
@@ -160,7 +159,7 @@ Function Get-LastLoggedOnUserName {
     return $null
 }
 
-Function Get-UserDisplayName {
+function Get-UserDisplayName {
     param (
         [string]$userName
     )
@@ -179,11 +178,14 @@ Function Get-UserDisplayName {
     return $null
 }
 
-Function Get-NetworkAddresses {
+function Get-NetworkAddresses {
     # This data comes from WMI
     try {
-        $networkAdapterConfigurations = Get-WmiObject -Class "Win32_NetworkAdapterConfiguration" | Where-Object { $null -ne $PSItem.IPAddress }
-        $networkAddresses = $networkAdapterConfigurations | ForEach-Object { $PSItem.IPAddress }
+        $networkAdapterConfiguration = Get-WmiObject -Class "Win32_NetworkAdapterConfiguration" -Filter "DNSDomain LIKE '$env:USERDOMAIN%'"
+        $ipAddress = [Linq.Enumerable]::First($networkAdapterConfiguration.IPAddress)
+        $macAddress = $networkAdapterConfiguration.MACAddress
+        $networkAddresses = @($ipAddress, $macAddress)
+        
         return $networkAddresses
     }
     catch {
@@ -197,7 +199,7 @@ Function Get-NetworkAddresses {
 
 #region Set Updated Object
 
-Function Set-UpdatedComputerObject {
+function Set-UpdatedComputerObject {
     param (
         [PSCustomObject]$updatedRecord
     )
