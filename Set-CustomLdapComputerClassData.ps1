@@ -5,20 +5,34 @@ Gather user/system data from the local machine then update the corresponding "ds
 .DESCRIPTION 
 Uses the Get-ItemProperty and Get-WmiObject Cmdlets to gather data from the Registry and WMI respectively. Calls the ManagementObject.Put(PutOptions) overload on the modified record to update the instance.
 
+.PARAMETER SetLastLogonExtensionAttribute
+[switch] When using this switch the 'extensionAttribute1' attribute will be set the current date/time. This should only be used when running the script at logon.
+
 .NOTES   
 Name: Set-CustomLdapComputerClassData.ps1
 Author: Jeremy Johnson
 Date Created: 1-3-2019
-Date Updated: 1-3-2019
+Date Updated: 1-28-2019
 Site: https://www.jmjohnson85.com
-Version: 1.0.0
+Version: 1.0.1
 
 .LINK
 https://www.jmjohnson85.com
 
 .EXAMPLE
-	.\Set-CustomLdapComputerClassData.ps1
+    .\Set-CustomLdapComputerClassData.ps1
+
+.EXAMPLE
+    .\Set-CustomLdapComputerClassData.ps1 -SetLastLogonExtensionAttribute
 #>
+
+#region Script Parameters
+
+param (
+    [switch]$SetLastLogonExtensionAttribute
+)
+
+#endregion
 
 #region Private Variables
 
@@ -32,6 +46,7 @@ function Initialize-Log4Net {
     param (
         [string]$libraryPath
     )
+
     # Load the log4net assembly from log4net.dll
     try {
         # UnsafeLoadFrom() allows loading the assembly from a UNC path
@@ -47,6 +62,7 @@ function Get-EventLogger {
     param (
         [string]$applicationName
     )
+
     # Configure log4net event logger
     $PatternLayoutFormat = '%date %-5level %logger - %message%newline'
     $PatternLayout = [log4net.Layout.PatternLayout]::New($PatternLayoutFormat)
@@ -130,12 +146,18 @@ function New-UpdatedComputerObject {
     # Query WMI for a list of network addresses
     [string[]]$networkAddresses = Get-NetworkAddresses
 
-    if ($null -ne $userName -and $null -ne $displayName -and $null -ne $networkAddresses) {
-        # Build the updated Active Directory computer attribute
+    # Only build the updated Active Directory record if all fields came back with data
+    if ($userName -ne "" -and $displayName -ne "" -and $null -ne $networkAddresses) {
         $updatedRecord = [PSCustomObject]@{
             DS_uid = @( $userName )
             DS_displayName = $displayName
             DS_networkAddress = $networkAddresses
+        }
+
+        if ($SetLastLogonExtensionAttribute) {
+            # The switch parameter is on so add the current date/time to the updated record
+            $currentDateTime = Get-Date
+            $updatedRecord | Add-Member -Name "DS_extensionAttribute1" -MemberType NoteProperty -Value $currentDateTime
         }
 
         return $updatedRecord
@@ -148,9 +170,12 @@ function Get-LastLoggedOnUserName {
     # This data comes from the registry
     try {
         $regEntry = Get-ItemProperty -Path HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Authentication\LogonUI -Name "LastLoggedOnSAMUser"
-        $lastLoggedOnSAMUserData = $regEntry.LastLoggedOnSAMUser.Split('\')
-        $userName = [Linq.Enumerable]::Last($lastLoggedOnSAMUserData)
-        return $userName
+        if ($null -ne $regEntry) {
+            $lastLoggedOnSAMUserData = $regEntry.LastLoggedOnSAMUser.Split('\')
+            $lastLoggedOnUserName = [Linq.Enumerable]::Last($lastLoggedOnSAMUserData)
+
+            return $lastLoggedOnUserName
+        }
     }
     catch {
         Write-Log -message ("EXCEPTION in {0}: {1}" -f $MyInvocation.MyCommand, $PSItem.Exception.Message)
@@ -163,12 +188,14 @@ function Get-UserDisplayName {
     param (
         [string]$userName
     )
+
     # This data comes from AD through the local WMI provider
     try {
         $ds_user = Get-WmiObject -Namespace "ROOT\directory\LDAP" -Class "ds_user" -Filter "DS_sAMAccountName='$userName'"
         if ($null -ne $ds_user) {
-            $displayName = if ($null -ne $ds_user.DS_displayName) {$ds_user.DS_displayName} else {[string]::Empty}
-            return $displayName
+            $userDisplayName = $ds_user.DS_displayName
+            
+            return $userDisplayName
         }   
     }
     catch {
@@ -182,11 +209,13 @@ function Get-NetworkAddresses {
     # This data comes from WMI
     try {
         $networkAdapterConfiguration = Get-WmiObject -Class "Win32_NetworkAdapterConfiguration" -Filter "DNSDomain LIKE '$env:USERDOMAIN%'"
-        $ipAddress = [Linq.Enumerable]::First($networkAdapterConfiguration.IPAddress)
-        $macAddress = $networkAdapterConfiguration.MACAddress
-        $networkAddresses = @($ipAddress, $macAddress)
-        
-        return $networkAddresses
+        if ($null -ne $networkAdapterConfiguration) {
+            $ipAddress = [Linq.Enumerable]::First($networkAdapterConfiguration.IPAddress)
+            $macAddress = $networkAdapterConfiguration.MACAddress
+            $networkAddresses = @($ipAddress, $macAddress)
+            
+            return $networkAddresses
+        }
     }
     catch {
         Write-Log -message ("EXCEPTION in {0}: {1}" -f $MyInvocation.MyCommand, $PSItem.Exception.Message)
@@ -203,6 +232,7 @@ function Set-UpdatedComputerObject {
     param (
         [PSCustomObject]$updatedRecord
     )
+
     try {
          # Get an array of the names of the properties to be updated
         [string[]]$properties = $updatedRecord.PSObject.Properties | ForEach-Object {$PSItem.Name}
@@ -247,10 +277,10 @@ if ([System.Security.Principal.WindowsIdentity]::GetCurrent().IsSystem) {
         if (Set-UpdatedComputerObject -updatedRecord $updatedRecord) {
             Write-Log -message "Update successful" -logEvent Info
         } else {
-            Exit-Script -exitCode 3 -message "Failed to update computer attribute" -logEvent Fatal
+            Exit-Script -exitCode 3 -message "Failed to update 'ds_computer' instance" -logEvent Fatal
         }
     } else {
-        Exit-Script -exitCode 2 -message "Failed to build updated computer attribute" -logEvent Fatal
+        Exit-Script -exitCode 2 -message "Failed to build updated 'ds_computer' data" -logEvent Fatal
     }
 } else {
     Exit-Script -exitCode 1 -message "Not running as ""NT AUTHORITY\SYSTEM""" -logEvent Fatal
