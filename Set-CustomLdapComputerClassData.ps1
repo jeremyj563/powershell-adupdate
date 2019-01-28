@@ -247,10 +247,10 @@ if ([System.Security.Principal.WindowsIdentity]::GetCurrent().IsSystem) {
         if (Set-UpdatedComputerObject -updatedRecord $updatedRecord) {
             Write-Log -message "Update successful" -logEvent Info
         } else {
-            Exit-Script -exitCode 3 -message "Failed to update computer attribute"
+            Exit-Script -exitCode 3 -message "Failed to update computer attribute" -logEvent Fatal
         }
     } else {
-        Exit-Script -exitCode 2 -message "Failed to build updated computer attribute"
+        Exit-Script -exitCode 2 -message "Failed to build updated computer attribute" -logEvent Fatal
     }
 } else {
     Exit-Script -exitCode 1 -message "Not running as ""NT AUTHORITY\SYSTEM""" -logEvent Fatal
