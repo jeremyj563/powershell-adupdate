@@ -212,7 +212,7 @@ function Get-NetworkAddresses {
         if ($null -ne $networkAdapterConfiguration) {
             $ipAddress = [Linq.Enumerable]::First($networkAdapterConfiguration.IPAddress)
             $macAddress = $networkAdapterConfiguration.MACAddress
-            [string[]]$networkAddresses = $ipAddress, $macAddress
+            [string[]]$networkAddresses = "$ipAddress,$macAddress"
             
             return $networkAddresses
         }
