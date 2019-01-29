@@ -208,8 +208,9 @@ function Get-UserDisplayName {
 function Get-NetworkAddresses {
     # This data comes from WMI
     try {
-        $networkAdapterConfiguration = Get-WmiObject -Class "Win32_NetworkAdapterConfiguration" -Filter "DNSDomain LIKE '$env:USERDOMAIN%'"
-        if ($null -ne $networkAdapterConfiguration) {
+        [Management.ManagementObject[]]$networkAdapterConfigurations = Get-WmiObject -Class "Win32_NetworkAdapterConfiguration" -Filter "DNSDomain LIKE '$env:USERDOMAIN%'"
+        if ($null -ne $networkAdapterConfigurations) {
+            $networkAdapterConfiguration = [Linq.Enumerable]::First($networkAdapterConfigurations)
             $ipAddress = [Linq.Enumerable]::First($networkAdapterConfiguration.IPAddress)
             $macAddress = $networkAdapterConfiguration.MACAddress
             [string[]]$networkAddresses = "$ipAddress,$macAddress"
